@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>BOSP PDF Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <style>
+    :root{
+      --primary:#1967d2; /* biru modern */
+      --primary-600:#155ab7;
+      --accent:#1a73e8;
+      --bg:#f7f9fc;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --white:#ffffff;
+      --danger:#dc2626;
+      --success:#059669;
+      --warning:#d97706;
+      --radius:12px;
+      --shadow: 0 10px 30px rgba(25,103,210,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:var(--primary);text-decoration:none}
+    .container{display:flex;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{
+      width:280px;background:var(--white);box-shadow:var(--shadow);padding:20px;position:sticky;top:0;align-self:flex-start;
+    }
+    .brand{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+    /* .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#60a5fa)} */
+    .logo{
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background-image: url('https://pusatinformasi.arkas.kemendikdasmen.go.id/hc/article_attachments/36781711175961');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    .brand h1{font-size:18px;margin:0}
+    .menu{display:flex;flex-direction:column;gap:8px}
+    .menu button{
+      width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e5e7eb;background:var(--white);
+      cursor:pointer;text-align:left;transition:.2s; font-weight:600;
+    }
+    .menu button:hover{border-color:#d1d5db;transform:translateY(-1px)}
+    .menu button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+    /* Header */
+    .header{
+      display:flex;justify-content:space-between;align-items:center;background:var(--white);
+      padding:16px 20px;border-radius:14px;box-shadow:var(--shadow); margin-bottom:16px;
+    }
+    .header .title{font-size:18px;font-weight:700}
+    .header .actions{display:flex;gap:10px;align-items:center}
+
+    /* Content */
+    .content{flex:1;padding:24px;max-width:1200px;margin:0 auto}
+    .card{
+      background:var(--white);border-radius:14px;box-shadow:var(--shadow);padding:16px;margin-bottom:16px;
+    }
+
+    /* Forms */
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .field{flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px}
+    label{font-weight:700;font-size:12px;color:#374151}
+    input[type="text"], input[type="email"], input[type="password"], select, textarea{
+      width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;outline:none;
+      transition:.2s;background:#fff; font:inherit;
+    }
+    textarea{min-height:90px;resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color:var(--primary)}
+
+    .btn{border:1px solid transparent;border-radius:10px;padding:10px 14px;background:var(--primary);color:#fff;cursor:pointer;font-weight:700}
+    .btn:hover{background:var(--primary-600)}
+    .btn.light{background:#eef2ff;color:var(--primary);border-color:#e0e7ff}
+    .btn.ghost{background:#fff;border-color:#e5e7eb;color:#111827}
+    .btn.danger{background:var(--danger);}
+
+    /* Table */
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
+    th,td{padding:12px;border-bottom:1px solid #f0f2f7}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;text-align:left;cursor:pointer}
+    tr:hover td{background:#fafbff}
+    .table-wrap{width:100%;overflow:auto;border:1px solid #eef2f7;border-radius:12px}
+
+    .table-wrap {
+      max-height: 350px;       /* batas tinggi area tabel */
+      overflow-y: auto;        /* scroll vertikal */
+      overflow-x: auto;        /* scroll horizontal */
+      border: 1px solid #ccc;
+    }
+
+    .table-wrap table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .table-wrap th,
+    .table-wrap td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      white-space: nowrap; /* biar tidak pecah baris */
+    }
+
+    .table-wrap th {
+      position: sticky;
+      top: 0;
+      background: #eef2f7;
+      z-index: 2;
+      text-align: center; /* header rata tengah */
+    }
+
+
+    /* Login/Register */
+    .auth-wrap{max-width:440px;margin:8vh auto;background:var(--white);padding:24px;border-radius:16px;box-shadow:var(--shadow)}
+    .center{text-align:center}
+    .tabs{display:flex;gap:10px;margin-bottom:16px}
+    .tabs button{flex:1}
+    .muted{color:var(--muted);font-size:12px}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000}
+    .modal{width:100%;max-width:720px;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:16px}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .close{border:none;background:transparent;font-size:20px;cursor:pointer}
+
+    /* Toast */
+    .toast{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:1001}
+    .toast .item{background:#111827;color:#fff;padding:12px 14px;border-radius:10px;box-shadow:var(--shadow);opacity:.96}
+
+    /* Spinner */
+    .spinner{width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .sidebar{display:none}
+      .content{padding:16px}
+    }
+
+    .modal .modal-content {
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    #modalAdmin .modal-content {
+      max-height: 80vh; /* batas tinggi modal */
+      overflow-y: auto; /* scroll vertical */
+    }
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal: Tambah/Edit Laporan -->
+<div class="modal-backdrop" id="modalLaporan">
+  <div class="modal">
+    <div class="modal-header">
+      <div id="modalTitle"><b>Tambah Laporan</b></div>
+      <button class="close" onclick="closeModal('#modalLaporan')">✕</button>
+    </div>
+    <div class="row">
+      <div class="field" id="fldSekolah" style="display:none">
+        <label>Sekolah (khusus Admin)</label>
+        <input type="text" id="inpSekolahAdmin" placeholder="Nama Sekolah">
+      </div>
+      <div class="field">
+        <label>Tahun Anggaran</label>
+        <select id="inpTahun"></select>
+      </div>
+      <div class="field">
+        <label>Sumber Dana</label>
+        <select id="inpSumberDana"></select>
+      </div>
+      <div class="field">
+        <label>Jenis Laporan</label>
+        <select id="inpKategori"></select>
+      </div>
+      <div class="field">
+        <label>Bulan</label>
+        <select id="inpBulan">
+          <option value="Januari">Januari</option>
+          <option value="Februari">Februari</option>
+          <option value="Maret">Maret</option>
+          <option value="April">April</option>
+          <option value="Mei">Mei</option>
+          <option value="Juni">Juni</option>
+          <option value="Juli">Juli</option>
+          <option value="Agustus">Agustus</option>
+          <option value="September">September</option>
+          <option value="Oktober">Oktober</option>
+          <option value="November">November</option>
+          <option value="Desember">Desember</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Keterangan</label>
+        <input type="text" id="inpKet" placeholder="Keterangan singkat"/>
+      </div>
+      <div class="field">
+        <label>Upload PDF</label>
+        <input type="file" id="inpFile" accept="application/pdf"/>
+        <small class="muted">Nama file akan diubah otomatis saat disimpan.</small>
+      </div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn ghost" onclick="closeModal('#modalLaporan')">Batal</button>
+      <button class="btn" id="btnSaveLaporan" onclick="saveLaporan()">Simpan</button>
+    </div>
+    <input type="hidden" id="inpIdLaporan"/>
+  </div>
+</div>
+
+<!-- Modal: Master Data -->
+<div class="modal-backdrop" id="modalMaster">
+  <div class="modal">
+    <div class="modal-header">
+      <div><b>Pengaturan Master Data</b></div>
+      <button class="close" onclick="closeModal('#modalMaster')">✕</button>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Tambah Sumber Dana</label>
+        <div class="row">
+          <input class="field" type="text" id="addDanaVal" placeholder="cth: BOSDA"/>
+          <button class="btn" onclick="addMaster('sumber_dana', '#addDanaVal')">Tambah</button>
+        </div>
+        <div id="listDana" style="margin-top:8px"></div>
+      </div>
+      <div class="field">
+        <label>Tambah Kategori Laporan</label>
+        <div class="row">
+          <input class="field" type="text" id="addKatVal" placeholder="cth: Penatausahaan"/>
+          <button class="btn" onclick="addMaster('kategori', '#addKatVal')">Tambah</button>
+        </div>
+        <div id="listKat" style="margin-top:8px"></div>
+      </div>
+      <div class="field">
+        <label>Tambah Tahun Anggaran</label>
+        <div class="row">
+          <input class="field" type="text" id="addThVal" placeholder="cth: 2025"/>
+          <button class="btn" onclick="addMaster('tahun', '#addThVal')">Tambah</button>
+        </div>
+        <div id="listTh" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Admin Approval & User Mgmt -->
+<div class="modal-backdrop" id="modalAdmin">
+  <div class="modal">
+    <div class="modal-header">
+      <div><b>Admin Panel</b></div>
+      <button class="close" onclick="closeModal('#modalAdmin')">✕</button>
+    </div>
+    <div class="card">
+      <h3>Approval Pendaftaran</h3>
+      <div class="table-wrap">
+        <table id="tblApproval">
+          <thead>
+            <tr>
+              <th>Waktu</th><th>Status</th><th>Jenjang</th><th>Negeri/Swasta</th><th>Sekolah</th><th>Email</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Manajemen Pengguna</h3>
+      <div class="table-wrap">
+        <table id="tblUsers">
+          <thead>
+            <tr>
+              <th>Role</th><th>Status</th><th>Jenjang</th><th>N/S</th><th>Sekolah</th><th>Email</th><th>Password</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ========= Client State =========
+  let SESSION_TOKEN = localStorage.getItem('bosp_token') || "";
+  let SESSION_INFO = null; // {email, role, sekolah}
+  let MASTER = { sumberDana:[], kategori:[], tahun:[] };
+  let ADMIN_SEKOLAH = []; // untuk filter admin
+
+  // ========= UI Renderers =========
+
+  function renderAuth(){
+    document.getElementById('app').innerHTML = `
+      <div class="auth-wrap">
+        <div class="center">
+          <div class="logo"></div>
+          <h2 style="margin:10px 0">BOSP PDF Manager</h2>
+          <div class="muted">Silakan login atau registrasi akun baru (menunggu approval admin).</div>
+        </div>
+        <div class="tabs" style="margin-top:16px">
+          <button class="btn light" onclick="switchAuth('login')">Login</button>
+          <button class="btn ghost" onclick="switchAuth('register')">Registrasi</button>
+        </div>
+        <div id="authForm"></div>
+      </div>
+    `;
+    switchAuth('login');
+  }
+
+  function switchAuth(mode){
+    if (mode==='login'){
+      document.getElementById('authForm').innerHTML = `
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="Nama@gmail.com"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••"/>
+        </div>
+        <div class="row" style="margin-top:10px;justify-content:space-between">
+          <button class="btn" onclick="doLogin()"><span id="spinLogin"></span> Masuk</button>
+          <span class="muted">Pastikan Email & Password anda benar.</span>
+        </div>
+      `;
+    } else {
+      document.getElementById('authForm').innerHTML = `
+        <div class="row">
+          <div class="field">
+            <label>Nama Pengguna</label>
+            <input type="text" id="regNama" placeholder="Nama lengkap"/>
+          </div>
+          <div class="field">
+            <label>Jenjang</label>
+            <select id="regJenjang">
+              <option>TK</option><option selected>SD</option><option>SMP</option><option>Lainnya</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Status Sekolah</label>
+            <select id="regStatus">
+              <option>Negeri</option><option selected>Swasta</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nama Sekolah</label>
+            <input type="text" id="regSekolah" placeholder="Nama sekolah"/>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="regEmail" placeholder="nama@sekolah.sch.id"/>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="regPassword" placeholder="buat password"/>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:10px">
+          <button class="btn ghost" onclick="switchAuth('login')">Batal</button>
+          <button class="btn" onclick="doRegister()"><span id="spinReg"></span> Daftar</button>
+        </div>
+      `;
+    }
+  }
+
+  function renderApp(){
+    const isAdmin = SESSION_INFO?.role === 'ADMIN';
+    document.getElementById('app').innerHTML = `
+      <div class="container">
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="logo"></div>
+            <div>
+              <h1>BOSP PDF Manager</h1>
+              <div class="muted" style="font-size:11px">${escapeHtml(SESSION_INFO.email)}</div>
+            </div>
+          </div>
+          <div class="menu">
+            <button class="active" id="btnMenuDashboard" onclick="showSection('dashboard')">📄 Dashboard</button>
+            <button onclick="openModal('#modalLaporan');initLaporanForm()">➕ Tambah Laporan</button>
+            <button onclick="openMaster()">⚙️ Pengaturan Data Master</button>
+            ${isAdmin ? `<button onclick="openAdmin()">🛡️ Admin Panel</button>` : ``}
+            <button onclick="doLogout()">Keluar</button>
+            <div class="small">Versi: 2.1 — BOSP PDF Manager</div>
+          </div>
+        </aside>
+        <main class="content">
+          <div class="header">
+            <div class="title">Dashboard Laporan</div>
+            <div class="actions">
+              ${ isAdmin ? `
+                <select id="filterSekolah" class="ghost"></select>
+              `:''}
+              <select id="filterTahun" class="ghost"></select>
+              <select id="filterDana" class="ghost"></select>
+              <select id="filterKat" class="ghost"></select>
+              <input type="text" id="filterQ" class="ghost" placeholder="Cari keterangan..."/>
+              <button class="btn" onclick="loadTable()">Terapkan</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-wrap">
+              <table id="tbl">
+                <thead>
+                  <tr>
+                    <th onclick="sortBy('tahun')">Tahun</th>
+                    <th onclick="sortBy('sumber_dana')">Sumber Dana</th>
+                    <th onclick="sortBy('kategori')">Jenis Laporan</th>
+                    <th onclick="sortBy('bulan')">Bulan</th>
+                    <th onclick="sortBy('keterangan')">Keterangan</th>
+                    <th>File</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+              <div class="muted" id="infoPaging"></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn ghost" onclick="prevPage()">←</button>
+                <button class="btn ghost" onclick="nextPage()">→</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+    fillMasterFilters();
+    if (isAdmin) fillAdminSekolahFilter();
+    loadTable();
+  }
+
+  // ========= Auth Actions =========
+  function doLogin(){
+    const email = val('#loginEmail'), password = val('#loginPassword');
+    if (!email || !password) return toast('Email & Password wajib diisi');
+    loading('#spinLogin', true);
+    google.script.run.withSuccessHandler(res=>{
+      loading('#spinLogin', false);
+      SESSION_TOKEN = res.token;
+      SESSION_INFO = {email:res.email, role:res.role, sekolah:res.sekolah};
+      localStorage.setItem('bosp_token', SESSION_TOKEN);
+      toast('Login berhasil');
+      renderApp();
+      startSessionPing();
+    }).withFailureHandler(err=>{
+      loading('#spinLogin', false);
+      toast(err.message || 'Gagal login');
+    }).login(email, password);
+  }
+
+  function doRegister(){
+    const payload = {
+      nama: val('#regNama'), jenjang: val('#regJenjang'),
+      statusSekolah: val('#regStatus'), sekolah: val('#regSekolah'),
+      email: val('#regEmail'), password: val('#regPassword')
+    };
+    if (Object.values(payload).some(v=>!v)) return toast('Semua field registrasi wajib diisi.');
+    loading('#spinReg', true);
+    google.script.run.withSuccessHandler(_=>{
+      loading('#spinReg', false);
+      toast('Registrasi berhasil. Menunggu approval admin (notif email terkirim).');
+      switchAuth('login');
+    }).withFailureHandler(err=>{
+      loading('#spinReg', false);
+      toast(err.message || 'Gagal registrasi');
+    }).registerUser(payload);
+  }
+
+  function doLogout(){
+    google.script.run.withSuccessHandler(_=>{
+      localStorage.removeItem('bosp_token');
+      SESSION_TOKEN = "";
+      SESSION_INFO = null;
+      toast('Logout berhasil');
+      renderAuth();
+      stopSessionPing();
+    }).logout(SESSION_TOKEN);
+  }
+
+  // ========= Session keep-alive (timeout 10 menit) =========
+  let pingTimer = null;
+  function startSessionPing(){
+    stopSessionPing();
+    pingTimer = setInterval(()=>{
+      google.script.run.withSuccessHandler(ok=>{
+        if (!ok){
+          // session kadaluarsa
+          localStorage.removeItem('bosp_token');
+          SESSION_TOKEN=""; SESSION_INFO=null;
+          toast('Sesi berakhir. Silakan login kembali.');
+          renderAuth();
+          stopSessionPing();
+        }
+      }).pingSession(SESSION_TOKEN);
+    }, 2*60*1000); // ping tiap 2 menit
+  }
+  function stopSessionPing(){
+    if (pingTimer){ clearInterval(pingTimer); pingTimer=null; }
+  }
+
+  // ========= Dashboard =========
+  function fillMasterFilters(){
+    google.script.run.withSuccessHandler(md=>{
+      MASTER = md;
+      fillSelect('#filterTahun', ["Semua Tahun"].concat(md.tahun));
+      fillSelect('#filterDana', ["Semua Dana"].concat(md.sumberDana));
+      fillSelect('#filterKat', ["Semua Jenis"].concat(md.kategori));
+    }).getMasterData();
+  }
+
+  
+  function fillAdminSekolahFilter(){
+    google.script.run.withSuccessHandler(list=>{
+      ADMIN_SEKOLAH = list;
+      fillSelect('#filterSekolah', ["Semua Sekolah"].concat(list));
+    }).listSekolahAll(SESSION_TOKEN);
+  }
+
+
+  // tabel
+  let DATAS = [], PAGE=1, PER=10, SORT_KEY='tahun', SORT_DIR=1;
+  function loadTable(){
+    const filters = {
+      sekolah: SESSION_INFO?.role==='ADMIN' ? val('#filterSekolah') : "",
+      tahun: val('#filterTahun'), sumber_dana: val('#filterDana'),
+      kategori: val('#filterKat'), q: val('#filterQ')
+    };
+    google.script.run.withSuccessHandler(rows=>{
+      DATAS = rows;
+      applySort();
+      renderPage();
+      toast('Data dimuat');
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal memuat data');
+    }).listLaporan(filters, SESSION_TOKEN);
+  }
+  function applySort(){
+    DATAS.sort((a,b)=>{
+      const va = (a[SORT_KEY]||"").toString().toLowerCase();
+      const vb = (b[SORT_KEY]||"").toString().toLowerCase();
+      if (va<vb) return -1*SORT_DIR;
+      if (va>vb) return 1*SORT_DIR;
+      return 0;
+    });
+  }
+  function sortBy(key){
+    if (SORT_KEY===key) SORT_DIR *= -1; else { SORT_KEY=key; SORT_DIR=1; }
+    applySort(); renderPage();
+  }
+  function renderPage(){
+    const start=(PAGE-1)*PER, end=start+PER;
+    const chunk = DATAS.slice(start,end);
+    const tb = document.querySelector('#tbl tbody');
+    tb.innerHTML = chunk.map(r=>`
+      <tr>
+        <td>${esc(r.tahun)}</td>
+        <td>${esc(r.sumber_dana)}</td>
+        <td>${esc(r.kategori)}</td>
+        <td>${esc(r.bulan)}</td>
+        <td>${esc(r.keterangan||'')}</td>
+        <td>${r.fileUrl? `<a href="${r.fileUrl}" target="_blank">Lihat</a>` : '<span class="muted">-</span>'}</td>
+        <td>
+          <button class="btn ghost" onclick="editLaporan('${r.id}')">Edit</button>
+          <button class="btn danger" onclick="delLaporan('${r.id}')">Hapus</button>
+        </td>
+      </tr>
+    `).join('');
+    document.getElementById('infoPaging').innerText = `Menampilkan ${chunk.length} dari ${DATAS.length} data • Hal ${PAGE}`;
+  }
+  function nextPage(){ if (PAGE*PER < DATAS.length){ PAGE++; renderPage(); } }
+  function prevPage(){ if (PAGE>1){ PAGE--; renderPage(); } }
+
+  // ========= Laporan Modal =========
+  function openModal(sel){ document.querySelector(sel).style.display='flex'; }
+  function closeModal(sel){ document.querySelector(sel).style.display='none'; resetModal(sel); }
+  function resetModal(sel){
+    if (sel==='#modalLaporan'){
+      setVal('#inpIdLaporan','');
+      setVal('#inpTahun','');
+      setVal('#inpSumberDana','');
+      setVal('#inpKategori','');
+      setVal('#inpBulan','Januari');
+      setVal('#inpKet','');
+      document.querySelector('#inpFile').value="";
+      document.getElementById('modalTitle').innerHTML = "<b>Tambah Laporan</b>";
+    }
+  }
+  function initLaporanForm(){
+    // isi dropdown master
+    google.script.run.withSuccessHandler(md=>{
+      MASTER = md;
+      fillSelect('#inpTahun', ["-- Pilih Tahun --"].concat(md.tahun));
+      fillSelect('#inpSumberDana', ["-- Pilih Dana --"].concat(md.sumberDana));
+      fillSelect('#inpKategori', ["-- Pilih Jenis --"].concat(md.kategori));
+      // Sekolah text input hanya tampil jika Admin
+      document.getElementById('fldSekolah').style.display = SESSION_INFO?.role==='ADMIN' ? '' : 'none';
+    }).getMasterData();
+  }
+  function editLaporan(id){
+    const r = DATAS.find(x=>x.id===id);
+    if (!r) return;
+    openModal('#modalLaporan'); initLaporanForm();
+    setVal('#inpIdLaporan', id);
+    if (SESSION_INFO?.role==='ADMIN') setVal('#inpSekolahAdmin', r.sekolah);
+    setVal('#inpTahun', r.tahun);
+    setVal('#inpSumberDana', r.sumber_dana);
+    setVal('#inpKategori', r.kategori);
+    setVal('#inpBulan', r.bulan);
+    setVal('#inpKet', r.keterangan||'');
+    document.getElementById('modalTitle').innerHTML = "<b>Edit Laporan</b>";
+  }
+
+  function readFileAsDataURL(file){
+    return new Promise((resolve, reject)=>{
+      if (!file) return resolve(""); // optional
+      const fr = new FileReader();
+      fr.onload = ()=>resolve(fr.result);
+      fr.onerror = reject;
+      fr.readAsDataURL(file);
+    });
+  }
+
+  async function saveLaporan(){
+    const id = val('#inpIdLaporan');
+    const form = {
+      id,
+      sekolah: SESSION_INFO?.role==='ADMIN' ? val('#inpSekolahAdmin') : undefined,
+      tahun: val('#inpTahun'),
+      sumber_dana: val('#inpSumberDana'),
+      kategori: val('#inpKategori'),
+      bulan: val('#inpBulan'),
+      keterangan: val('#inpKet')
+    };
+    // validasi
+    const required = ['tahun','sumber_dana','kategori','bulan'];
+    for (let k of required) if (!form[k]) return toast('Lengkapi semua field wajib.');
+    const file = document.getElementById('inpFile').files[0];
+    const btn = document.getElementById('btnSaveLaporan');
+    const oldHTML = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner"></span> Mengunggah...`;
+    btn.disabled = true;
+
+    try{
+      form.fileDataUrl = await readFileAsDataURL(file);
+      google.script.run.withSuccessHandler(res=>{
+        btn.innerHTML = oldHTML; btn.disabled=false;
+        if (id) toast('Laporan diperbarui');
+        else toast('Laporan ditambahkan');
+        closeModal('#modalLaporan');
+        loadTable();
+      }).withFailureHandler(err=>{
+        btn.innerHTML = oldHTML; btn.disabled=false;
+        toast(err.message || 'Gagal menyimpan laporan');
+      }).addOrUpdateLaporan(form, SESSION_TOKEN);
+    } catch(e){
+      btn.innerHTML = oldHTML; btn.disabled=false;
+      toast('Gagal membaca file');
+    }
+  }
+
+  function delLaporan(id){
+    if (!confirm('Hapus laporan ini?')) return;
+    google.script.run.withSuccessHandler(_=>{
+      toast('Laporan dihapus');
+      loadTable();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal menghapus');
+    }).deleteLaporan(id, SESSION_TOKEN);
+  }
+
+  // ========= Master Data =========
+  function openMaster(){
+    openModal('#modalMaster');
+    refreshMasterList();
+  }
+  function refreshMasterList(){
+    google.script.run.withSuccessHandler(md=>{
+      MASTER = md;
+      // render lists (dengan tombol hapus)
+      renderTagList('#listDana', md.sumberDana, 'sumber_dana');
+      renderTagList('#listKat', md.kategori, 'kategori');
+      renderTagList('#listTh', md.tahun, 'tahun');
+      // perbarui dropdown di dashboard juga
+      fillMasterFilters();
+    }).getMasterData();
+  }
+  function addMaster(type, inputSel){
+    const valx = document.querySelector(inputSel).value.trim();
+    if (!valx) return;
+    google.script.run.withSuccessHandler(_=>{
+      toast('Master data ditambahkan');
+      document.querySelector(inputSel).value="";
+      refreshMasterList();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal tambah master');
+    }).addMasterItem(type, valx, SESSION_TOKEN);
+  }
+  function removeMaster(type, value){
+    if (!confirm(`Hapus ${value}?`)) return;
+    google.script.run.withSuccessHandler(_=>{
+      toast('Master data dihapus');
+      refreshMasterList();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal hapus master');
+    }).removeMasterItem(type, value, SESSION_TOKEN);
+  }
+  function renderTagList(sel, arr, type){
+    const el = document.querySelector(sel);
+    el.innerHTML = arr.map(v=>`
+      <span style="display:inline-flex;align-items:center;gap:8px;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin:4px">
+        ${esc(v)}
+        <button class="btn ghost" style="padding:4px 8px" onclick="removeMaster('${type}','${v.replace(/'/g,"\\'")}')">Hapus</button>
+      </span>
+    `).join('');
+  }
+
+  // ========= Admin Panel =========
+  function openAdmin(){
+    openModal('#modalAdmin');
+    loadApproval();
+    loadUsers();
+  }
+  function loadApproval(){
+    google.script.run.withSuccessHandler(rows=>{
+      const tbody = document.querySelector('#tblApproval tbody');
+      tbody.innerHTML = rows.map(r=>`
+        <tr>
+          <td>${esc(r.timestamp)}</td>
+          <td>${esc(r.status)}</td>
+          <td>${esc(r.jenjang)}</td>
+          <td>${esc(r.statusSekolah)}</td>
+          <td>${esc(r.sekolah)}</td>
+          <td>${esc(r.email)}</td>
+          <td>
+            ${r.status==='PENDING' ? `
+              <button class="btn" onclick="approve(${r.i})">Approve</button>
+              <button class="btn danger" onclick="reject(${r.i})">Tolak</button>` : `<span class="muted">-</span>`
+            }
+          </td>
+        </tr>
+      `).join('');
+    }).withFailureHandler(err=>{ toast(err.message || 'Gagal memuat approval'); })
+    .listPendingApprovals(SESSION_TOKEN);
+  }
+  function approve(i){
+    google.script.run.withSuccessHandler(_=>{
+      toast('Akun disetujui');
+      loadApproval();
+      loadUsers();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal approve');
+    }).approveUser(i, SESSION_TOKEN);
+  }
+  function reject(i){
+    google.script.run.withSuccessHandler(_=>{
+      toast('Registrasi ditolak');
+      loadApproval();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal tolak');
+    }).rejectUser(i, SESSION_TOKEN);
+  }
+  function loadUsers(){
+    google.script.run.withSuccessHandler(rows=>{
+      const tbody = document.querySelector('#tblUsers tbody');
+      tbody.innerHTML = rows.map(r=>`
+        <tr>
+          <td>${esc(r.role)}</td>
+          <td>${esc(r.status)}</td>
+          <td>${esc(r.jenjang)}</td>
+          <td>${esc(r.negeri_swasta)}</td>
+          <td>${esc(r.sekolah)}</td>
+          <td>${esc(r.email)}</td>
+          <td><code>${esc(r.password)}</code></td>
+          <td>
+            <button class="btn ghost" onclick="toggleUser(${r.i}, '${r.status==='AKTIF'?'BLOKIR':'AKTIF'}')">${r.status==='AKTIF'?'Blokir':'Aktifkan'}</button>
+            <button class="btn" onclick="changePwd(${r.i})">Ubah Password</button>
+          </td>
+        </tr>
+      `).join('');
+    }).withFailureHandler(err=>{ toast(err.message || 'Gagal memuat user'); })
+    .listUsers(SESSION_TOKEN);
+  }
+  function toggleUser(i, statusBaru){
+    google.script.run.withSuccessHandler(_=>{
+      toast('Status diubah');
+      loadUsers();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal mengubah status');
+    }).setUserStatus(i, statusBaru, SESSION_TOKEN);
+  }
+  function changePwd(i){
+    const p = prompt('Password baru:');
+    if (!p) return;
+    google.script.run.withSuccessHandler(_=>{
+      toast('Password diubah');
+      loadUsers();
+    }).withFailureHandler(err=>{
+      toast(err.message || 'Gagal ubah password');
+    }).updateUserPassword(i, p, SESSION_TOKEN);
+  }
+
+  // ========= Helpers =========
+  function val(sel){ return (document.querySelector(sel)?.value||"").trim(); }
+  function setVal(sel, v){ if (document.querySelector(sel)) document.querySelector(sel).value = v; }
+  function esc(s){ return (s===null||s===undefined)?"":String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function escapeHtml(s){ return esc(s); }
+  function fillSelect(sel, arr){
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.innerHTML = arr.map((v,i)=>`<option value="${i===0 && v===""? "":esc(v)}">${esc(v)}</option>`).join('');
+  }
+  function toast(msg){
+    const box = document.getElementById('toast');
+    const id = 't'+Date.now();
+    const div = document.createElement('div');
+    div.className='item'; div.id=id; div.innerHTML=esc(msg);
+    box.appendChild(div);
+    setTimeout(()=>{ const d=document.getElementById(id); if(d) d.remove(); }, 3500);
+  }
+  function loading(sel, state){
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.innerHTML = state ? `<span class="spinner"></span>` : ``;
+  }
+
+  // ========= Bootstrap =========
+  (function init(){
+    if (localStorage.getItem('bosp_token')){
+      SESSION_TOKEN = localStorage.getItem('bosp_token');
+      google.script.run.withSuccessHandler(sess=>{
+        if (sess){
+          SESSION_INFO = sess;
+          renderApp();
+          startSessionPing();
+        } else {
+          renderAuth();
+        }
+      }).getSessionInfo(SESSION_TOKEN);
+    } else {
+      renderAuth();
+    }
+  })();
+</script>
+
+</body>
+</html>

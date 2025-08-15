@@ -1,15 +1,15 @@
 /** 
- * Web App: BOSP PDF Manager (Single-Page)
+ * Web App: SIMBOSP (Single-Page)
  * Fitur utama: Multi-user login, registrasi dengan approval admin, dashboard laporan PDF,
  * master data (tahun/sumber dana/kategori), struktur folder Drive otomatis,
- * notifikasi email, log aktivitas, session timeout 10 menit.
+ * notifikasi email, log aktivitas, session timeout 5 menit.
  */
 
-const TZ = "Asia/Jakarta";
-const TS_FMT = "yyyy-MM-dd HH:mm:ss";
-const SESSION_TTL_SEC = 600; // 10 menit
+const TZ = "Asia/Jakarta"; // Setting TimeZone APP
+const TS_FMT = "yyyy-MM-dd HH:mm:ss"; // Format Date
+const SESSION_TTL_SEC = 300; // 5 menit AutoLogOut
 const CACHE_PREFIX = "BOSP_SESS_";
-const APP_FOLDER_NAME = "BOSP_Manager_Files"; // folder root aplikasi di parent folder Spreadsheet
+const APP_FOLDER_NAME = "SIM_BOSP_Manager_Files"; // folder root aplikasi di parent folder Spreadsheet
 
 // --- Sheet names ---
 const SH_USER = "user";
@@ -65,7 +65,7 @@ function removeDefaultSheet() {
   }
 }
 
-// --- Inisialisasi sekali ---
+// --- Inisialisasi sekali pada saat pertama kali launch ---
 function ensureSetup_() {
   getOrCreateSheet(SH_USER, HDR_USER);
   getOrCreateSheet(SH_APPROVAL, HDR_APPROVAL);
@@ -176,7 +176,7 @@ function doGet() {
   ensureSetup_();
   const t = HtmlService.createTemplateFromFile("Index"); // single HTML file
   const page = t.evaluate()
-    .setTitle("BOSP PDF MANAGER")
+    .setTitle("SIMBOSP")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setSandboxMode(HtmlService.SandboxMode.IFRAME);
   return page;
@@ -288,7 +288,7 @@ function registerUser(payload) {
           <li>Sekolah: ${escapeHtml_(sekolah)}</li>
           <li>Email: ${escapeHtml_(email)}</li>
         </ul>
-        <p>Silakan buka Panel Admin → Approval untuk menyetujui.</p>
+        <p>Silakan buka Panel Admin → Approval untuk menyetujui pada link : s.id/SIMBOSP.</p>
       `
     });
   } catch(e) {}
@@ -439,12 +439,11 @@ function listLaporan(filters, token) {
         // if (filters && filters.sekolah && String(filters.sekolah).trim() && (rec.sekolah+"").toLowerCase() !== (String(filters.sekolah).trim()+"").toLowerCase()) return;
       }
       // filter lain (gunakan perbandingan string yang dinormalisasi)
-
       if (filters) {
         if (filters.sekolah && String(filters.sekolah).trim() !== "Semua Sekolah" && rec.sekolah !== String(filters.sekolah).trim()) return;
-        if (filters.tahun && String(filters.tahun).trim() !== "Semua Tahun" && rec.tahun !== String(filters.tahun).trim()) return;
-        if (filters.sumber_dana && String(filters.sumber_dana).trim() !== "Semua Dana" && rec.sumber_dana !== String(filters.sumber_dana).trim()) return;
-        if (filters.kategori && String(filters.kategori).trim() !== "Semua Jenis" && rec.kategori !== String(filters.kategori).trim()) return;
+        if (filters.tahun && String(filters.tahun).trim() !== "Semua Tahun Anggaran" && rec.tahun !== String(filters.tahun).trim()) return;
+        if (filters.sumber_dana && String(filters.sumber_dana).trim() !== "Semua Sumber Dana" && rec.sumber_dana !== String(filters.sumber_dana).trim()) return;
+        if (filters.kategori && String(filters.kategori).trim() !== "Semua Jenis Laporan" && rec.kategori !== String(filters.kategori).trim()) return;
         if (filters.q && String(filters.q).trim() && !(`${rec.keterangan}`.toLowerCase().includes(String(filters.q).toLowerCase()))) return;
       }
       rows.push(rec);

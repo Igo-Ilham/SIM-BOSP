@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>BOSP PDF Manager</title>
+  <title>SIMBOSP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
   <style>
@@ -39,7 +39,7 @@
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-    }
+    } // Logo bersumber dari halaman kemendikdasmen
     .brand h1{font-size:18px;margin:0}
     .menu{display:flex;flex-direction:column;gap:8px}
     .menu button{
@@ -230,18 +230,18 @@
       <div class="field">
         <label>Tambah Sumber Dana</label>
         <div class="row">
-          <input class="field" type="text" id="addDanaVal" placeholder="cth: BOSDA"/>
+          <input class="field" type="text" id="addDanaVal" placeholder="cth: BOSP Reguler"/>
           <button class="btn" onclick="addMaster('sumber_dana', '#addDanaVal')">Tambah</button>
         </div>
-        <div id="listDana" style="margin-top:8px"></div>
+        <!-- <div id="listDana" style="margin-top:8px"></div> -->
       </div>
       <div class="field">
         <label>Tambah Kategori Laporan</label>
         <div class="row">
-          <input class="field" type="text" id="addKatVal" placeholder="cth: Penatausahaan"/>
+          <input class="field" type="text" id="addKatVal" placeholder="cth: Lembar Kertas Kerja (Tahunan)"/>
           <button class="btn" onclick="addMaster('kategori', '#addKatVal')">Tambah</button>
         </div>
-        <div id="listKat" style="margin-top:8px"></div>
+        <!-- <div id="listKat" style="margin-top:8px"></div> -->
       </div>
       <div class="field">
         <label>Tambah Tahun Anggaran</label>
@@ -249,7 +249,7 @@
           <input class="field" type="text" id="addThVal" placeholder="cth: 2025"/>
           <button class="btn" onclick="addMaster('tahun', '#addThVal')">Tambah</button>
         </div>
-        <div id="listTh" style="margin-top:8px"></div>
+        <!-- <div id="listTh" style="margin-top:8px"></div> -->
       </div>
     </div>
   </div>
@@ -307,8 +307,8 @@
       <div class="auth-wrap">
         <div class="center">
           <div class="logo"></div>
-          <h2 style="margin:10px 0">BOSP PDF Manager</h2>
-          <div class="muted">Silakan login atau registrasi akun baru (menunggu approval admin).</div>
+          <h2 style="margin:10px 0">SIMBOSP</h2>
+          <div class="muted">Sistem Informasi Manajemen Bantuan Operasional Satuan Pendidkan</div>
         </div>
         <div class="tabs" style="margin-top:16px">
           <button class="btn light" onclick="switchAuth('login')">Login</button>
@@ -325,7 +325,7 @@
       document.getElementById('authForm').innerHTML = `
         <div class="field">
           <label>Email</label>
-          <input type="email" id="loginEmail" placeholder="Nama@gmail.com"/>
+          <input type="email" id="loginEmail" placeholder="**********@gmail.com"/>
         </div>
         <div class="field">
           <label>Password</label>
@@ -333,7 +333,7 @@
         </div>
         <div class="row" style="margin-top:10px;justify-content:space-between">
           <button class="btn" onclick="doLogin()"><span id="spinLogin"></span> Masuk</button>
-          <span class="muted">Pastikan Email & Password anda benar.</span>
+          <span class="muted">Silahkan registrasi bagi pengguna baru.</span>
         </div>
       `;
     } else {
@@ -346,7 +346,7 @@
           <div class="field">
             <label>Jenjang</label>
             <select id="regJenjang">
-              <option>TK</option><option selected>SD</option><option>SMP</option><option>Lainnya</option>
+              <option>KB</option><option>TPA</option><option>SPS</option><option>TK</option><option>RA</option><option selected>SD</option><option>SMP</option><option>Lainnya</option>
             </select>
           </div>
           <div class="field">
@@ -361,7 +361,7 @@
           </div>
           <div class="field">
             <label>Email</label>
-            <input type="email" id="regEmail" placeholder="nama@sekolah.sch.id"/>
+            <input type="email" id="regEmail" placeholder="**********@gmail.com"/>
           </div>
           <div class="field">
             <label>Password</label>
@@ -384,17 +384,17 @@
           <div class="brand">
             <div class="logo"></div>
             <div>
-              <h1>BOSP PDF Manager</h1>
+              <h1>SIMBOSP</h1>
               <div class="muted" style="font-size:11px">${escapeHtml(SESSION_INFO.email)}</div>
             </div>
           </div>
           <div class="menu">
             <button class="active" id="btnMenuDashboard" onclick="showSection('dashboard')">📄 Dashboard</button>
             <button onclick="openModal('#modalLaporan');initLaporanForm()">➕ Tambah Laporan</button>
-            <button onclick="openMaster()">⚙️ Pengaturan Data Master</button>
+            ${isAdmin ? `<button onclick="openMaster()">⚙️ Pengaturan Data Master</button>` : ``}
             ${isAdmin ? `<button onclick="openAdmin()">🛡️ Admin Panel</button>` : ``}
             <button onclick="doLogout()">Keluar</button>
-            <div class="small">Versi: 2.1 — BOSP PDF Manager</div>
+            <div class="small">SIMBOSP - Versi : 2.2</div>
           </div>
         </aside>
         <main class="content">
@@ -518,9 +518,9 @@
   function fillMasterFilters(){
     google.script.run.withSuccessHandler(md=>{
       MASTER = md;
-      fillSelect('#filterTahun', ["Semua Tahun"].concat(md.tahun));
-      fillSelect('#filterDana', ["Semua Dana"].concat(md.sumberDana));
-      fillSelect('#filterKat', ["Semua Jenis"].concat(md.kategori));
+      fillSelect('#filterTahun', ["Semua Tahun Anggaran"].concat(md.tahun));
+      fillSelect('#filterDana', ["Semua Sumber Dana"].concat(md.sumberDana));
+      fillSelect('#filterKat', ["Semua Jenis Laporan"].concat(md.kategori));
     }).getMasterData();
   }
 

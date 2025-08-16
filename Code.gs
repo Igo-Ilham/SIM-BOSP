@@ -478,7 +478,8 @@ function addOrUpdateLaporan(form, token) {
     // susun folder: Sekolah / Sumber Dana / Kategori
     const fSchool = getOrCreateSchoolFolder_(sekolah);
     const fDana = getOrCreateSubFolder_(fSchool, sumber_dana);
-    const fKat  = getOrCreateSubFolder_(fDana, kategori);
+    const fTh = getOrCreateSubFolder_(fDana, Tahun);
+    const fKat  = getOrCreateSubFolder_(fTh, kategori);
 
     // nama file: Sekolah - SumberDana - JenisLaporan - Bulan Tahun.pdf
     const safeSek = sekolah.replace(/[\\/:*?"<>|]/g,'-');

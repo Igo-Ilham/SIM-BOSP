@@ -5,10 +5,11 @@
  * notifikasi email, log aktivitas, session timeout 5 menit.
  */
 
+// --- Setup Config ---
 const TZ = "Asia/Jakarta"; // Setting TimeZone APP
-const TS_FMT = "yyyy-MM-dd HH:mm:ss"; // Format Date
-const SESSION_TTL_SEC = 300; // 5 menit AutoLogOut
-const CACHE_PREFIX = "BOSP_SESS_";
+const TS_FMT = "yyyy-MM-dd HH:mm:ss"; // Setting Format Date
+const SESSION_TTL_SEC = 300; // 5 menit (300 detik) AutoLogOut
+const CACHE_PREFIX = "BOSP_SESS_"; // Prefix Setiap Sesi Cache
 const APP_FOLDER_NAME = "SIM_BOSP_Manager_Files"; // folder root aplikasi di parent folder Spreadsheet
 
 // --- Sheet names ---

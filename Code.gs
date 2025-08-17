@@ -18,6 +18,7 @@ const SH_APPROVAL = "approval";
 const SH_LAPORAN = "laporan";
 const SH_KAT = "kategori_laporan";
 const SH_SD = "sumber_dana";
+const SH_BULAN = "bulan" ;
 const SH_TAHUN = "tahun_anggaran";
 const SH_LOG = "log_aktivitas";
 
@@ -27,6 +28,7 @@ const HDR_APPROVAL = ["timestamp", "status", "jenjang", "negeri_swasta", "sekola
 const HDR_LAPORAN = ["id", "timestamp", "owner_email", "sekolah", "tahun", "sumber_dana", "kategori", "bulan", "keterangan", "fileId", "fileUrl", "fileName"];
 const HDR_KAT = ["kategori"];
 const HDR_SD = ["sumber_dana"];
+const HDR_BULAN = ["bulan"];
 const HDR_TAHUN = ["tahun"];
 const HDR_LOG = ["timestamp", "email", "aksi", "detail"];
 
@@ -73,6 +75,7 @@ function ensureSetup_() {
   getOrCreateSheet(SH_LAPORAN, HDR_LAPORAN);
   getOrCreateSheet(SH_KAT, HDR_KAT);
   getOrCreateSheet(SH_SD, HDR_SD);
+  getOrCreateSheet(SH_BULAN, HDR_BULAN);
   getOrCreateSheet(SH_TAHUN, HDR_TAHUN);
   getOrCreateSheet(SH_LOG, HDR_LOG);
   removeDefaultSheet();
@@ -89,20 +92,27 @@ function ensureSetup_() {
   }
 
   // Seed master data awal jika kosong
-  const shSD = getSheetByName(SH_SD);
+  // Generate Sumber Dana
+  const shSD = getSheetByName(SH_SD); 
   if (shSD.getLastRow() < 2) {
     [["BOSP Reguler"], ["BOSP Daerah"], ["BOSP Kinerja"], ["SILPA BOSP Kinerja"], ["BOSP Afirmasi"], ["Lainnya"]].forEach(v => shSD.appendRow(v));
   }
+  // Generate Kategori Laporan
   const shK = getSheetByName(SH_KAT);
   if (shK.getLastRow() < 2) {
-    [["Rincian Kertas Kerja (Tahunan)"], ["Rincian Kertas Kerja (Tahapan)"], ["Rincian Kertas Kerja (Triwulan)"], ["Rincian Kertas Kerja (Bulanan)"], ["Lembar Kertas Kerja (Unit 2.2)"], ["Lembar Kertas Kerja (Unit 2.2.1)"], ["Buku Kas Umum (Bulanan)"], ["Buku Kas Umum (Tahunan)"], ["Buku Kas Pembantu Bank (Bulanan)"], ["Buku Pembantu Pajak (Bulanan)"], ["Buku Kas Pembantu Tunai (Bulanan)"], ["Rekapitulasi Realisasi (Bulanan)"], ["Rekapitulasi Realisasi (Tahapan)"], ["Rekapitulasi Realisasi (Tahunan)"], ["Rekapitulasi Realisasi Barang Habis Pakai (Bulanan)"], ["Rekapitulasi Realisasi Barang Modal/Aset (Bulanan)"], ["Buku Pembantu Rincian Objek Belanja (Bulanan)"], ["SPTJM (Bulanan)"], ["SPTJM (Semester)"], ["Laporan Penggunaan Hibah Dana (Semester)"], ["Laporan Penggunaan Hibah Dana (Tahunan)"], ["Mutasi Rekening Koran (Bulanan)"], ["Register Penutupan Kas (Bulanan)"], ["Bukti Pengeluaran Non Tunai (BNU)"], ["Bukti Pengeluaran Tunai (BPU)"], ["Bukti Penarikan (BBU)"], ["Berita Acara Rekonsiliasi"]].forEach(v => shK.appendRow(v));
+    [["Rincian Kertas Kerja (Tahunan)"], ["Rincian Kertas Kerja (Tahapan)"], ["Rincian Kertas Kerja (Triwulan)"], ["Rincian Kertas Kerja (Bulanan)"], ["Lembar Kertas Kerja Unit Tahap"], ["Lembar Kertas Kerja Unit Triwulan"], ["Lembar Kertas Kerja (Unit 2.2)"], ["Lembar Kertas Kerja (Unit 2.2.1)"], ["Buku Kas Umum (Bulanan)"], ["Buku Kas Umum (Tahunan)"], ["Buku Kas Pembantu Bank (Bulanan)"], ["Buku Pembantu Pajak (Bulanan)"], ["Buku Kas Pembantu Tunai (Bulanan)"], ["Rekapitulasi Realisasi (Bulanan)"], ["Rekapitulasi Realisasi (Tahapan)"], ["Rekapitulasi Realisasi (Tahunan)"], ["Rekapitulasi Realisasi Barang Habis Pakai (Bulanan)"], ["Rekapitulasi Realisasi Barang Modal/Aset (Bulanan)"], ["Buku Pembantu Rincian Objek Belanja (Bulanan)"], ["SPTJM (Bulanan)"], ["SPTJM (Semester)"], ["Laporan Penggunaan Hibah Dana (Semester)"], ["Laporan Penggunaan Hibah Dana (Tahunan)"], ["Mutasi Rekening Koran (Bulanan)"], ["Register Penutupan Kas (Bulanan)"], ["Bukti Pengeluaran Non Tunai (BNU)"], ["Bukti Pengeluaran Tunai (BPU)"], ["Bukti Penarikan (BBU)"], ["Berita Acara Rekonsiliasi"]].forEach(v => shK.appendRow(v));
   }
+  //Generate Bulan
+  const shB = getSheetByName(SH_BULAN);
+  if (shB.getLastRow() < 2) {
+    [["Januari"], ["Februari"], ["Maret"], ["April"], ["Mei"], ["Juni"], ["Juli"], ["Agustus"], ["September"], ["Oktober"], ["November"], ["Desember"]].forEach(v => shB.appendRow(v));
+  }
+  // Generate Tahun
   const shT = getSheetByName(SH_TAHUN);
   if (shT.getLastRow() < 2) {
     const y = new Date().getFullYear();
     [[String(y-1)], [String(y)], [String(y+1)]].forEach(v => shT.appendRow(v));
   }
-
   // Pastikan folder root aplikasi ada di parent folder Spreadsheet
   ensureAppRootFolder_();
 }
@@ -113,7 +123,7 @@ function getSpreadsheetParentFolder_() {
   const parents = file.getParents();
   return parents.hasNext() ? parents.next() : DriveApp.getRootFolder();
 }
-
+// Membuat Root Folder
 function ensureAppRootFolder_() {
   const parent = getSpreadsheetParentFolder_();
   const folders = parent.getFoldersByName(APP_FOLDER_NAME);
@@ -121,19 +131,20 @@ function ensureAppRootFolder_() {
     parent.createFolder(APP_FOLDER_NAME);
   }
 }
-
+// Tarik folder Root Aplikasi
 function getAppRootFolder_() {
   ensureAppRootFolder_();
   const parent = getSpreadsheetParentFolder_();
   return parent.getFoldersByName(APP_FOLDER_NAME).next();
 }
-
+// Tarik atau buat baru folder nama sekolah
 function getOrCreateSchoolFolder_(schoolName) {
   const root = getAppRootFolder_();
   let it = root.getFoldersByName(schoolName);
   if (it.hasNext()) return it.next();
   return root.createFolder(schoolName);
 }
+// Tarik atau buat baru sub folder kategori
 function getOrCreateSubFolder_(parent, name) {
   let it = parent.getFoldersByName(name);
   if (it.hasNext()) return it.next();
@@ -192,10 +203,11 @@ function include(filename) {
 function getMasterData() {
   const sd = getSheetByName(SH_SD).getRange(2,1,getSheetByName(SH_SD).getLastRow()-1,1).getValues().flat().filter(String);
   const kat = getSheetByName(SH_KAT).getRange(2,1,getSheetByName(SH_KAT).getLastRow()-1,1).getValues().flat().filter(String);
+  const bln = getSheetByName(SH_BULAN).getRange(2,1, getSheetByName(SH_BULAN).getLastRow()-1,1).getValues().flat().filter(String);
   const th = getSheetByName(SH_TAHUN).getRange(2,1,getSheetByName(SH_TAHUN).getLastRow()-1,1).getValues().flat().filter(String);
-  return { sumberDana: sd, kategori: kat, tahun: th };
+  return { sumberDana: sd, kategori: kat, bulan: bln, tahun: th };
 }
-
+// Menambah Master Data Baru
 function addMasterItem(type, value, token) {
   const sess = getSession_(token);
   if (!sess || sess.role !== "ADMIN") throw new Error("Unauthorized");
@@ -209,7 +221,7 @@ function addMasterItem(type, value, token) {
   logAktivitas_(sess.email, "ADD_MASTER_"+type.toUpperCase(), value);
   return getMasterData();
 }
-
+// Menghapus Master Data
 function removeMasterItem(type, value, token) {
   const sess = getSession_(token);
   if (!sess || sess.role !== "ADMIN") throw new Error("Unauthorized");
@@ -255,14 +267,14 @@ function login(email, password) {
   logAktivitas_(found[6], "LOGIN", "Berhasil login");
   return { token, role: found[1], email: found[6], sekolah: found[5] };
 }
-
+// --- Logout ---
 function logout(token) {
   const sess = getSession_(token);
   if (sess) logAktivitas_(sess.email, "LOGOUT", "Keluar");
   destroySession_(token);
   return true;
 }
-
+// --- Register User Baru ---
 function registerUser(payload) {
   ensureSetup_();
   // payload: {nama, jenjang, statusSekolah, sekolah, email, password}
@@ -296,7 +308,7 @@ function registerUser(payload) {
   logAktivitas_(email, "REGISTER", `Registrasi ${sekolah} (${jenjang}/${statusSekolah})`);
   return true;
 }
-
+// --- Register Menunggu Approval ---
 function listPendingApprovals(token) {
   const sess = getSession_(token);
   if (!sess || sess.role !== "ADMIN") throw new Error("Unauthorized");
@@ -320,7 +332,7 @@ function listPendingApprovals(token) {
   }
   return rows;
 }
-
+/// --- User approval ---
 function approveUser(rowIndex, token) {
   const sess = getSession_(token);
   if (!sess || sess.role !== "ADMIN") throw new Error("Unauthorized");
@@ -340,7 +352,7 @@ function approveUser(rowIndex, token) {
     MailApp.sendEmail({
       to: r[5],
       subject: "[BOSP] Akun Anda telah disetujui",
-      htmlBody: `<p>Akun untuk sekolah <b>${escapeHtml_(r[4])}</b> telah <b>Disetujui</b>. Silakan login.</p>`
+      htmlBody: `<p>Akun untuk sekolah <b>${escapeHtml_(r[4])}</b> telah <b>Disetujui</b>. Silakan login pada link : s.id/SIMBOSP.</p>`
     });
   } catch(e) {}
 
@@ -351,6 +363,7 @@ function approveUser(rowIndex, token) {
   return true;
 }
 
+// --- User tidak terdaftar ditolak ---
 function rejectUser(rowIndex, token) {
   const sess = getSession_(token);
   if (!sess || sess.role !== "ADMIN") throw new Error("Unauthorized");
@@ -445,6 +458,7 @@ function listLaporan(filters, token) {
         if (filters.tahun && String(filters.tahun).trim() !== "Semua Tahun Anggaran" && rec.tahun !== String(filters.tahun).trim()) return;
         if (filters.sumber_dana && String(filters.sumber_dana).trim() !== "Semua Sumber Dana" && rec.sumber_dana !== String(filters.sumber_dana).trim()) return;
         if (filters.kategori && String(filters.kategori).trim() !== "Semua Jenis Laporan" && rec.kategori !== String(filters.kategori).trim()) return;
+        if (filters.bulan && String(filters.bulan).trim() !== "Semua Bulan" && rec.bulan !== String(filters.bulan).trim()) return;
         if (filters.q && String(filters.q).trim() && !(`${rec.keterangan}`.toLowerCase().includes(String(filters.q).toLowerCase()))) return;
       }
       rows.push(rec);
@@ -452,8 +466,7 @@ function listLaporan(filters, token) {
   }
   return rows;
 }
-
-
+// Tambah Laporan
 function addOrUpdateLaporan(form, token) {
   const sess = getSession_(token);
   if (!sess) throw new Error("Session habis / tidak valid.");
@@ -478,7 +491,7 @@ function addOrUpdateLaporan(form, token) {
     // susun folder: Sekolah / Sumber Dana / Kategori
     const fSchool = getOrCreateSchoolFolder_(sekolah);
     const fDana = getOrCreateSubFolder_(fSchool, sumber_dana);
-    const fTh = getOrCreateSubFolder_(fDana, Tahun);
+    const fTh = getOrCreateSubFolder_(fDana, tahun) ;
     const fKat  = getOrCreateSubFolder_(fTh, kategori);
 
     // nama file: Sekolah - SumberDana - JenisLaporan - Bulan Tahun.pdf
@@ -514,7 +527,7 @@ function addOrUpdateLaporan(form, token) {
     return { inserted: true, id: newId };
   }
 }
-
+// --- Hapus Data Laporan ---
 function deleteLaporan(id, token) {
   const sess = getSession_(token);
   if (!sess) throw new Error("Session habis / tidak valid.");
@@ -531,7 +544,7 @@ function deleteLaporan(id, token) {
   logAktivitas_(sess.email, "DEL_LAPORAN", `id=${id}`);
   return true;
 }
-
+// --- Pencarian Data ---
 function findRowById_(id) {
   const sh = getSheetByName(SH_LAPORAN);
   const last = sh.getLastRow();
